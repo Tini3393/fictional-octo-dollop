@@ -15,9 +15,11 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      # 1️⃣ Checkout your repository
+      # 1️⃣ Checkout repository with full history and tags
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch all history and tags
 
       # 2️⃣ Configure GitHub Pages environment
       - name: Configure GitHub Pages
@@ -38,7 +40,7 @@ jobs:
       - name: Create version tag
         if: success()
         run: |
-          # Get latest tag, if none exists start at v1.0.0
+          # Get latest tag; if none exists, start at v1.0.0
           LATEST_TAG=$(git describe --tags $(git rev-list --tags --max-count=1) 2>/dev/null)
           if [ -z "$LATEST_TAG" ]; then
             NEW_TAG="v1.0.0"
