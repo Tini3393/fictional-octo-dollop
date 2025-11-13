@@ -40,12 +40,17 @@ jobs:
       - name: Create version tag
         if: success()
         run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+
+          # Checkout main branch to avoid detached HEAD issues
+          git checkout main
+
           # Get latest tag; if none exists, start at v1.0.0
           LATEST_TAG=$(git describe --tags $(git rev-list --tags --max-count=1) 2>/dev/null)
           if [ -z "$LATEST_TAG" ]; then
             NEW_TAG="v1.0.0"
           else
-            # Increment patch version
             MAJOR=$(echo $LATEST_TAG | cut -d. -f1 | tr -d v)
             MINOR=$(echo $LATEST_TAG | cut -d. -f2)
             PATCH=$(echo $LATEST_TAG | cut -d. -f3)
@@ -53,10 +58,6 @@ jobs:
             NEW_TAG="v$MAJOR.$MINOR.$PATCH"
           fi
           echo "New tag: $NEW_TAG"
-
-          # Configure Git user for GitHub Actions
-          git config user.name "github-actions"
-          git config user.email "actions@github.com"
 
           # Create and push the tag
           git tag $NEW_TAG
