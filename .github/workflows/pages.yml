@@ -1,6 +1,5 @@
 name: Deploy Static Site to GitHub Pages
 
-# Trigger workflow automatically on any push to main
 on:
   push:
     branches:
