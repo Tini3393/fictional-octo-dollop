@@ -1,28 +1,45 @@
+name: Deploy Static Site to GitHub Pages
+
+# Trigger workflow on push to main branch
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
+      # 1️⃣ Checkout your repository
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # 2️⃣ Configure GitHub Pages environment
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v4
 
+      # 3️⃣ Upload static site artifact
       - name: Upload static site
         uses: actions/upload-pages-artifact@v4
         with:
           path: ./public
 
+      # 4️⃣ Deploy to GitHub Pages
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
 
+      # 5️⃣ Create automatic version tag if deployment succeeds
       - name: Create version tag
-        if: success()  # only run if previous steps succeeded
+        if: success()
         run: |
-          # Get the latest tag
+          # Get latest tag, if none exists start at v1.0.0
           LATEST_TAG=$(git describe --tags $(git rev-list --tags --max-count=1) 2>/dev/null)
-          
           if [ -z "$LATEST_TAG" ]; then
             NEW_TAG="v1.0.0"
           else
@@ -33,12 +50,13 @@ jobs:
             PATCH=$((PATCH+1))
             NEW_TAG="v$MAJOR.$MINOR.$PATCH"
           fi
-
           echo "New tag: $NEW_TAG"
 
-          # Create and push the tag
+          # Configure Git user for GitHub Actions
           git config user.name "github-actions"
           git config user.email "actions@github.com"
+
+          # Create and push the tag
           git tag $NEW_TAG
           git push origin $NEW_TAG
 
