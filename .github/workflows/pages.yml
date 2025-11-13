@@ -1,6 +1,6 @@
 name: Deploy Static Site to GitHub Pages
 
-# Trigger workflow on push to main branch
+# Trigger workflow automatically on any push to main
 on:
   push:
     branches:
@@ -19,13 +19,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Fetch full history (needed for Pages)
+          fetch-depth: 0  # Fetch full history
 
-      # 2️⃣ Configure GitHub Pages environment
+      # 2️⃣ Configure GitHub Pages
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v4
 
-      # 3️⃣ Upload static site artifact
+      # 3️⃣ Upload the site artifact
       - name: Upload static site
         uses: actions/upload-pages-artifact@v4
         with:
@@ -35,4 +35,8 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+      # 5️⃣ Output deployment URL in logs
+      - name: Show deployment URL
+        run: echo "Site deployed at: ${{ steps.deployment.outputs.page_url }}"
 
