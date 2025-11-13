@@ -1,81 +1,30 @@
-name: Build, Test, and Deploy to GitHub Pages
+name: Deploy Static Site to GitHub Pages
 
 on:
   push:
-    branches: ["main"]
+    branches:
+      - main
 
 permissions:
   contents: read
   pages: write
   id-token: write
 
-concurrency:
-  group: "pages"
-  cancel-in-progress: true
-
 jobs:
-  build-and-test:
+  deploy:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v4
 
-      - name: Install dependencies (if package.json exists)
-        run: |
-          if [ -f package.json ]; then
-            npm ci
-          else
-            echo "No package.json found, skipping npm install."
-          fi
-
-      - name: Run tests (if test script exists)
-        run: |
-          if [ -f package.json ]; then
-            npm test || echo "⚠️ No test script found or tests failed, skipping."
-          else
-            echo "No package.json, skipping tests."
-          fi
-
-      - name: Build site (if build script exists)
-        run: |
-          if [ -f package.json ]; then
-            npm run build || echo "No build script found, skipping build."
-          else
-            echo "No package.json, using static files from ./public"
-          fi
-
-      - name: Prepare site for deployment
-        run: |
-          mkdir -p ./_site
-          if [ -d ./dist ]; then
-            cp -r dist/* _site/
-          elif [ -d ./build ]; then
-            cp -r build/* _site/
-          elif [ -d ./public ]; then
-            cp -r public/* _site/
-          else
-            echo "No site directory found!"
-          fi
-
-      - name: Upload artifact
+      - name: Upload static site
         uses: actions/upload-pages-artifact@v4
         with:
-          path: ./_site
+          path: ./public
 
-  deploy:
-    needs: build-and-test
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-
-    steps:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
