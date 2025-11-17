@@ -39,3 +39,5 @@ jobs:
       - name: Show deployment URL
         run: echo Site deployed at: ${{ steps.deployment.outputs.page_url }}
 
+- name: Show deployment URL
+  run: echo "Site deployed successfully"
