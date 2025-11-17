@@ -1,0 +1,51 @@
+name: Deploy
+
+on:
+  push:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+
+    steps:
+      # Step 1: Checkout repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Step 2: Verify public folder exists
+      - name: Verify public folder
+        run: |
+          if [ ! -d "./public" ]; then
+            echo "Error: ./public folder does not exist. Deployment aborted."
+            exit 1
+          else
+            echo "./public folder exists. Proceeding with deployment."
+          fi
+
+      # Step 3: Configure GitHub Pages
+      - name: Configure Pages
+        uses: actions/configure-pages@v4
+
+      # Step 4: Upload public folder as artifact
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: ./public
+
+      # Step 5: Deploy to GitHub Pages
+      - id: deployment
+        uses: actions/deploy-pages@v4
+
+      # Step 6: Show deployed URL
+      - name: Show GitHub Pages URL
+        run: |
+          echo "Your site is live at: ${{ steps.deployment.outputs.page_url }}"
+
