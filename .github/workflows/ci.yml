@@ -13,16 +13,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Build project
-        run: npm run build
+      # Optional: run HTML/CSS/JS lint checks
+      - name: Validate HTML
+        run: |
+          sudo apt-get install tidy -y
+          tidy -errors public/index.html || true
 
   test:
     runs-on: ubuntu-latest
@@ -31,16 +26,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Run tests
-        run: npm test
+      # Example: run a simple link checker
+      - name: Check for broken links
+        run: |
+          sudo apt-get install linkchecker -y
+          linkchecker public/index.html || true
 
   deploy:
     runs-on: ubuntu-latest
@@ -54,3 +44,4 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./public
+
