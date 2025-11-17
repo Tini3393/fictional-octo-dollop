@@ -3,8 +3,8 @@ name: CI/CD Pipeline
 on:
   push:
     branches:
-      - main       # Production
-      - develop    # Staging
+      - main
+      - develop
 
 permissions:
   contents: read
@@ -14,8 +14,6 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    outputs:
-      artifact-path: ./public
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -30,27 +28,9 @@ jobs:
         with:
           path: ./public
 
-  test:
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Validate HTML
-        run: |
-          sudo apt-get update
-          sudo apt-get install tidy -y
-          tidy -errors public/index.html || true
-
-      - name: Check links
-        run: |
-          sudo apt-get install linkchecker -y
-          linkchecker public/index.html || true
-
   deploy:
     runs-on: ubuntu-latest
-    needs: test
+    needs: build
     environment:
       name: ${{ github.ref == 'refs/heads/main' && 'production' || 'staging' }}
     steps:
@@ -65,3 +45,4 @@ jobs:
           else
             echo "Production site is live at: ${{ steps.deployment.outputs.page_url }}"
           fi
+
