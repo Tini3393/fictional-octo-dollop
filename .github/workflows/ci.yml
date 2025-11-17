@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4   # latest checkout
+        uses: actions/checkout@v4
 
       # Upload the public folder as the Pages artifact
       - name: Upload Pages artifact
@@ -22,9 +22,29 @@ jobs:
         with:
           path: ./public
 
-  deploy:
+  test:
     runs-on: ubuntu-latest
     needs: build
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Validate HTML
+      - name: Validate HTML
+        run: |
+          sudo apt-get update
+          sudo apt-get install tidy -y
+          tidy -errors public/index.html || true
+
+      # Check for broken links
+      - name: Check links
+        run: |
+          sudo apt-get install linkchecker -y
+          linkchecker public/index.html || true
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: test
     steps:
       - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v4
