@@ -28,7 +28,7 @@ jobs:
       - name: Upload static site
         uses: actions/upload-pages-artifact@v4
         with:
-          path: ./public
+          path: ./public   # Adjust if your site files are in a different folder
 
       # 4️⃣ Deploy to GitHub Pages
       - name: Deploy to GitHub Pages
@@ -37,5 +37,5 @@ jobs:
 
       # 5️⃣ Output deployment URL in logs
       - name: Show deployment URL
-        run: echo "Site deployed at: ${{ steps.deployment.outputs.page_url }}"
+        run: echo 'Site deployed at: ${{ steps.deployment.outputs.page_url }}'
 
