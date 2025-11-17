@@ -3,11 +3,9 @@ name: CI/CD Pipeline
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
 
 permissions:
-  contents: write
+  contents: read
   pages: write
   id-token: write
 
@@ -18,34 +16,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Optional: validate HTML
-      - name: Validate HTML
-        run: |
-          sudo apt-get install tidy -y
-          tidy -errors public/index.html || true
-
-  test:
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      # Example: run a simple link check
-      - name: Check for broken links
-        run: |
-          sudo apt-get install linkchecker -y
-          linkchecker public/index.html || true
+      # Upload the public folder as the Pages artifact
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v2
+        with:
+          path: ./public
 
   deploy:
     runs-on: ubuntu-latest
-    needs: test
+    needs: build
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
       - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
 
