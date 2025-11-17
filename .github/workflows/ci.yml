@@ -18,7 +18,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # optional validation steps here
+      # Optional: validate HTML
+      - name: Validate HTML
+        run: |
+          sudo apt-get install tidy -y
+          tidy -errors public/index.html || true
 
   test:
     runs-on: ubuntu-latest
@@ -26,8 +30,12 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-      - name: Run simple tests
-        run: echo "Tests passed!"
+
+      # Example: run a simple link check
+      - name: Check for broken links
+        run: |
+          sudo apt-get install linkchecker -y
+          linkchecker public/index.html || true
 
   deploy:
     runs-on: ubuntu-latest
@@ -37,8 +45,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
+        uses: actions/deploy-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./public
 
