@@ -2,53 +2,46 @@ name: Deploy Static Site to GitHub Pages
 
 on:
   push:
-    branches:
-      - main
+    branches: ["main"]
+  workflow_dispatch:
 
 permissions:
   contents: read
   pages: write
   id-token: write
 
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
 jobs:
   deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
-    steps:
-      # 1️⃣ Checkout repository with full history
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0  # Fetch full history
 
-      # 2️⃣ Configure GitHub Pages
-      - name: Configure GitHub Pages
+    steps:
+      # 1️⃣ Checkout repo
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # 2️⃣ Setup GitHub Pages
+      - name: Setup Pages
         uses: actions/configure-pages@v4
 
-      # 3️⃣ Upload the site artifact
+      # 3️⃣ Upload static files from /public
       - name: Upload static site
         uses: actions/upload-pages-artifact@v4
         with:
-          path: ./public   # change if your site files are in another folder
+          path: ./public   # Change this if your files are elsewhere
 
       # 4️⃣ Deploy to GitHub Pages
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
 
-      # 5️⃣ Output deployment URL in logs
-      - name: Show deployment URL
-        run: echo Site deployed at: ${{ steps.deployment.outputs.page_url }}
-
-
-            - name: Upload static site
-        uses: actions/upload-pages-artifact@v4
-        with:
-          path: ./public
-
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
-
+      # 5️⃣ Show final URL in the logs
       - name: Show deployment URL
         run: echo "Site deployed at: ${{ steps.deployment.outputs.page_url }}"
 
