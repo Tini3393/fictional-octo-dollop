@@ -17,7 +17,7 @@ jobs:
 
     steps:
       # Step 1: Checkout repository
-      - name: Checkout repo
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       # Step 2: Verify public folder exists
@@ -46,5 +46,6 @@ jobs:
 
       # Step 6: Show deployed URL
       - name: Show GitHub Pages URL
-        run: echo "Your site is live at: ${{ steps.deployment.outputs.page_url }}"
+        run: |
+          echo "Your site is live at: ${{ steps.deployment.outputs.page_url }}"
 
