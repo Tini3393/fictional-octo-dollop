@@ -1,37 +1,49 @@
-name: Deploy to GitHub Pages
+name: CI/CD Pages Deployment
 
 on:
   push:
-    branches: ["develop"]
+    branches:
+      - main      # Production
+      - develop   # Staging
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      artifact-path: ./public
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Build site
         run: |
           mkdir -p public
-          cp -r * public/ || true
+          echo "<h1>Hello from ${{ github.ref_name }}!</h1>" > public/index.html
 
       - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v2
         with:
           path: ./public
 
   deploy:
     needs: build
-    permissions:
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
+    environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'staging' }}
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+      - name: Show deployed URL
+        run: |
+          if [ "${{ github.ref }}" == "refs/heads/develop" ]; then
+            echo "Staging site is live at: ${{ steps.deployment.outputs.page_url }}"
+          else
+            echo "Production site is live at: ${{ steps.deployment.outputs.page_url }}"
+          fi
 
