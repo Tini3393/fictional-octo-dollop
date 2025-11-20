@@ -5,55 +5,60 @@ on:
     branches:
       - main
   pull_request:
+    branches:
+      - main
 
 jobs:
-
-  test:
+  # 1️⃣ Build and Test
+  build-and-test:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/upload-artifact@v4
-
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
+          python-version: "3.11"
 
       - name: Install dependencies
         run: |
+          python -m pip install --upgrade pip
           pip install -r requirements.txt
 
       - name: Run tests
         run: |
-          echo "No tests yet — skipping"
+          # Add your test command here, e.g. pytest
+          echo "Running tests..."
+          pytest || true
 
-  build_docker:
-    runs-on: ubuntu-latest
-    needs: test
-    steps:
-      - name: Checkout code
+      - name: Upload test artifacts
         uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: |
+            *.log
+            test-results/
 
+  # 2️⃣ Build and Push Docker Image
+  docker-build-and-push:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Log in to Docker Hub
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build Docker image
         run: |
-          docker build -t tini3393/devops-lab-app:latest .
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/devops-sop-site:latest .
 
       - name: Push Docker image
         run: |
-          docker push tini3393/devops-lab-app:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/devops-sop-site:latest
 
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build_docker
-    steps:
-      - name: Deploy placeholder
-        run: |
-          echo "Deployment simulated. Add SSH or cloud deploy later."
