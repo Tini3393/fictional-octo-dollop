@@ -4,41 +4,58 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
+      # Step 1: Checkout the repo
+      - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Set up Python
+      # Step 2: Set up Python
+      - name: Set up Python 3.11
         uses: actions/setup-python@v4
         with:
           python-version: 3.11
 
-      - name: Install Dependencies
+      # Step 3: Install dependencies
+      - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run Tests
+      # Step 4: Run tests (optional)
+      - name: Run tests
         run: |
-          # Add test commands if you have them
-          echo "No tests defined yet"
+          echo "No tests defined yet"  # Replace with actual test commands if available
 
+      # Step 5: Build Docker image
+      - name: Build Docker image
+        run: docker build -t tini3393/devops-sop-site:latest .
+
+      # Step 6: Log in to Docker Hub
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build Docker Image
-        run: |
-          docker build -t tini3393/devops-sop-site:latest .
+      # Step 7: Push Docker image
+      - name: Push Docker image
+        run: docker push tini3393/devops-sop-site:latest
 
-      - name: Push Docker Image
-        run: |
-          docker push tini3393/devops-sop-site:latest
+      # Step 8: Upload build artifacts
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: docker-image-info
+          path: |
+            Dockerfile
+            requirements.txt
+            app.py
 
